@@ -1,0 +1,177 @@
+<html>
+
+<head>
+                                        <title> "Machine Learning Assignment"</title>
+</head>
+
+<body>
+
+<p> The project is to predict variables "classe"
+in the training set and then creating a report describing
+of builting model and cross validation. Also used prediction model to predict 20 different test cases.</p>
+
+
+<p> Uploaded R packages for project analysis</p>
+<!--begin.rcode
+library(ElemStatLearn)
+library(ggplot2)
+library(lattice)
+library(caret)
+library(gbm)
+library(pgmm)
+library(rpart)
+library(lubridate)
+library(randomForest)
+library(rattle)
+library(fastAdaboost)
+library(dplyr)
+library(corrplot)
+end.rcode-->
+
+
+<p>The training and testing data for this project are available here:</p>
+<!--begin.rcode
+dattr <- read.csv("C:/Users/akshi/Documents/R/coursera_data_science/8_Practical_machine_learning/week4/assingment_machine_learning/pml-training.csv")
+datts <- read.csv("C:/Users/akshi/Documents/R/coursera_data_science/8_Practical_machine_learning/week4/assingment_machine_learning/pml-testing.csv")
+
+end.rcode-->
+<p> Partition of dattr data into (70%)training data set for modeling process and
+(30%)testing data set for validations.</p>
+<!--begin.rcode
+intrain <- createDataPartition(dattr$classe, p= 0.7 ,list = FALSE)
+train <- dattr[intrain,]
+test <- dattr[-intrain,]
+end.rcode-->
+
+<p> Dimensions of train and test data.</p>
+<!--begin.rcode
+dim(train)
+dim(test)
+end.rcode-->
+<p> Both train and test data set have  160 variables</p>
+
+<p>Data cleaning of training data set for further use 
+"nearly-zero-variance" for training data predictors and there ID variables for
+identifing and eliminating prior to modeling.</p>
+<!--begin.rcode
+natr <- nearZeroVar(train)
+
+train1 <- train[,-natr]
+test1 <-  test[,-natr]
+end.rcode-->
+<p> Removing variables that are mostly NA</p>
+<!--begin.rcode
+nas <- sapply(train1,function(x)mean(is.na(x)))>0.95
+
+train2 <- train1[,nas== FALSE]
+test2 <-  test1[,nas== FALSE]
+end.rcode-->
+<p> training and testing data set for modeling</p>
+<!--begin.rcode
+training <- train2[,8:59]
+testing <- test2[,8:59]
+end.rcode-->
+<p>With the process of cleaning data reduced to 54 variables</p>
+
+<p>Correlation Analysis with correlation plot( corrplot)</p>
+<!--begin.rcode
+correlation <- cor(training[,1:51])
+corrplot(correlation, type ="lower", method = "color")
+end.rcode-->
+<p>Highly correlated variables are shown with dark color in the graph.</p>
+
+<p> Three methods are used for model the regression (the training data set) and 
+the best one with higher accuracy will be used for quiz pediction. The methods are 
+1 Decision Tree Model
+2 Random Forest
+3 Generalized Boosted Model
+ Confusion Matrix is plotted at the end of every analysis for better accuracy of the models</p>
+
+<p>a) Method : Decision Tree Model</p>
+<!--begin.rcode
+mod1 <- train(classe ~.,training, method ="rpart")
+end.rcode-->
+<p> Prediction on testing data set</p>
+<!--begin.rcode
+pred1  <- predict(mod1, testing)
+cnmat1 <- confusionMatrix(pred1, testing$classe)
+cnmat1
+
+end.rcode-->
+<p> Plot</p>
+<!--begin.rcode
+fancyRpartPlot(mod1$finalModel)
+end.rcode-->
+<p>b) Method : Random Forest Model</p>
+<!--begin.rcode
+mod2 <- randomForest(classe ~., data=training, ntree= 1000)
+end.rcode-->
+<p> Prediction on testing data set</p>
+<!--begin.rcode
+pred2 <- predict(mod2, testing)
+cnmat2 <- confusionMatrix(pred2, testing$classe)
+cnmat2
+end.rcode-->
+<p> Plot</p>
+<!--begin.rcode
+plot(cnmat2$table, col=cnmat2$byclass, main = paste( "decision Tree - Accuracy =",
+                                                     round(cnmat2$overall["Accuracy"],4)))
+end.rcode-->
+#c)  Generalized Boosted Model
+<!--begin.rcode
+controlpr <- trainControl(method ="cv", number =3, verbose = FALSE  )
+mod3  <- train(classe~., data = training, method='gbm', trControl = controlpr, verbose= FALSE)
+
+end.rcode-->
+<p>A gradient boosted model with multinomial loss function.
+150 iterations were performed.
+There were 51 predictors of which 51 had non-zero influence.</p>
+
+ <p>Prediction on testing data set</p>
+<!--begin.rcode
+pred3  <- predict(mod3, testing)
+cnmat3  <- confusionMatrix( pred3, testing$classe)$overall[1]
+cnmat3
+end.rcode-->
+<p> With 3 different regression models we got 3 different accuracies :  
+a) Decision Tree Model
+Accuracy : 0.4856 
+
+b) Random Forest Model
+Accuracy : 0.9961  
+
+c) Genralized Boosted Model
+Accuracy : 0.9658454 
+ After getting Accuracies of 3 different regression model we finalaze to go with 
+Random Forest machine learning algorithm.
+
+Applied Random Forest machine learning algorithm to the 20 test cases available in the test data 
+ predict in appropriate format to the Course Project Prediction Quiz for automated grading.</p>
+
+<!--begin.rcode
+pred5 <- predict(mod2, datts)
+
+end.rcode-->
+
+<p> got result as follows:</p>
+
+<!--begin.rcode fig.width=7, fig.height=6
+pred5
+end.rcode-->
+
+
+<p> Plot</p>
+<!--begin.rcode fig.width=7, fig.height=6
+plot(pred5, col= "red", main = "Test Cases (Random Forest)" )
+end.rcode-->
+
+
+
+
+
+
+
+
+
+</body>
+</html>
