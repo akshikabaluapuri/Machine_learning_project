@@ -1,0 +1,387 @@
+<html>
+
+<head>
+<style type="text/css">
+.knitr .inline {
+  background-color: #f7f7f7;
+  border:solid 1px #B0B0B0;
+}
+.error {
+	font-weight: bold;
+	color: #FF0000;
+}
+.warning {
+	font-weight: bold;
+}
+.message {
+	font-style: italic;
+}
+.source, .output, .warning, .error, .message {
+	padding: 0 1em;
+  border:solid 1px #F7F7F7;
+}
+.source {
+  background-color: #f5f5f5;
+}
+.rimage .left {
+  text-align: left;
+}
+.rimage .right {
+  text-align: right;
+}
+.rimage .center {
+  text-align: center;
+}
+.hl.num {
+  color: #AF0F91;
+}
+.hl.str {
+  color: #317ECC;
+}
+.hl.com {
+  color: #AD95AF;
+  font-style: italic;
+}
+.hl.opt {
+  color: #000000;
+}
+.hl.std {
+  color: #585858;
+}
+.hl.kwa {
+  color: #295F94;
+  font-weight: bold;
+}
+.hl.kwb {
+  color: #B05A65;
+}
+.hl.kwc {
+  color: #55aa55;
+}
+.hl.kwd {
+  color: #BC5A65;
+  font-weight: bold;
+}
+</style>
+                                        <title> "Machine Learning Assignment"</title>
+</head>
+
+<body>
+
+<p> The project is to predict variables "classe"
+in the training set and then creating a report describing
+of builting model and cross validation. Also used prediction model to predict 20 different test cases.</p>
+
+
+<p> Uploaded R packages for project analysis</p>
+<div class="chunk" id="unnamed-chunk-1"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(ElemStatLearn)</span>
+</pre></div>
+<div class="warning"><pre class="knitr r">## Warning: package 'ElemStatLearn' was built under R version 3.5.2
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(ggplot2)</span>
+<span class="hl kwd">library</span><span class="hl std">(lattice)</span>
+<span class="hl kwd">library</span><span class="hl std">(caret)</span>
+<span class="hl kwd">library</span><span class="hl std">(gbm)</span>
+</pre></div>
+<div class="warning"><pre class="knitr r">## Warning: package 'gbm' was built under R version 3.5.2
+</pre></div>
+<div class="message"><pre class="knitr r">## Loaded gbm 2.1.5
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(pgmm)</span>
+</pre></div>
+<div class="warning"><pre class="knitr r">## Warning: package 'pgmm' was built under R version 3.5.2
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(rpart)</span>
+<span class="hl kwd">library</span><span class="hl std">(lubridate)</span>
+</pre></div>
+<div class="warning"><pre class="knitr r">## Warning: package 'lubridate' was built under R version 3.5.2
+</pre></div>
+<div class="message"><pre class="knitr r">## 
+## Attaching package: 'lubridate'
+</pre></div>
+<div class="message"><pre class="knitr r">## The following object is masked from 'package:base':
+## 
+##     date
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(randomForest)</span>
+</pre></div>
+<div class="warning"><pre class="knitr r">## Warning: package 'randomForest' was built under R version 3.5.2
+</pre></div>
+<div class="message"><pre class="knitr r">## randomForest 4.6-14
+</pre></div>
+<div class="message"><pre class="knitr r">## Type rfNews() to see new features/changes/bug fixes.
+</pre></div>
+<div class="message"><pre class="knitr r">## 
+## Attaching package: 'randomForest'
+</pre></div>
+<div class="message"><pre class="knitr r">## The following object is masked from 'package:ggplot2':
+## 
+##     margin
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(rattle)</span>
+</pre></div>
+<div class="warning"><pre class="knitr r">## Warning: package 'rattle' was built under R version 3.5.2
+</pre></div>
+<div class="message"><pre class="knitr r">## Rattle: A free graphical interface for data science with R.
+## Version 5.2.0 Copyright (c) 2006-2018 Togaware Pty Ltd.
+## Type 'rattle()' to shake, rattle, and roll your data.
+</pre></div>
+<div class="message"><pre class="knitr r">## 
+## Attaching package: 'rattle'
+</pre></div>
+<div class="message"><pre class="knitr r">## The following object is masked from 'package:randomForest':
+## 
+##     importance
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(fastAdaboost)</span>
+</pre></div>
+<div class="warning"><pre class="knitr r">## Warning: package 'fastAdaboost' was built under R version 3.5.2
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(dplyr)</span>
+</pre></div>
+<div class="message"><pre class="knitr r">## 
+## Attaching package: 'dplyr'
+</pre></div>
+<div class="message"><pre class="knitr r">## The following object is masked from 'package:randomForest':
+## 
+##     combine
+</pre></div>
+<div class="message"><pre class="knitr r">## The following objects are masked from 'package:lubridate':
+## 
+##     intersect, setdiff, union
+</pre></div>
+<div class="message"><pre class="knitr r">## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+</pre></div>
+<div class="message"><pre class="knitr r">## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(corrplot)</span>
+</pre></div>
+<div class="warning"><pre class="knitr r">## Warning: package 'corrplot' was built under R version 3.5.2
+</pre></div>
+<div class="message"><pre class="knitr r">## corrplot 0.84 loaded
+</pre></div>
+</div></div>
+
+
+<p>The training and testing data for this project are available here:</p>
+<div class="chunk" id="unnamed-chunk-2"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">dattr</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">read.csv</span><span class="hl std">(</span><span class="hl str">&quot;C:/Users/akshi/Documents/R/coursera_data_science/8_Practical_machine_learning/week4/assingment_machine_learning/pml-training.csv&quot;</span><span class="hl std">)</span>
+<span class="hl std">datts</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">read.csv</span><span class="hl std">(</span><span class="hl str">&quot;C:/Users/akshi/Documents/R/coursera_data_science/8_Practical_machine_learning/week4/assingment_machine_learning/pml-testing.csv&quot;</span><span class="hl std">)</span>
+</pre></div>
+</div></div>
+<p> Partition of dattr data into (70%)training data set for modeling process and
+(30%)testing data set for validations.</p>
+<div class="chunk" id="unnamed-chunk-3"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">intrain</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">createDataPartition</span><span class="hl std">(dattr</span><span class="hl opt">$</span><span class="hl std">classe,</span> <span class="hl kwc">p</span><span class="hl std">=</span> <span class="hl num">0.7</span> <span class="hl std">,</span><span class="hl kwc">list</span> <span class="hl std">=</span> <span class="hl num">FALSE</span><span class="hl std">)</span>
+<span class="hl std">train</span> <span class="hl kwb">&lt;-</span> <span class="hl std">dattr[intrain,]</span>
+<span class="hl std">test</span> <span class="hl kwb">&lt;-</span> <span class="hl std">dattr[</span><span class="hl opt">-</span><span class="hl std">intrain,]</span>
+</pre></div>
+</div></div>
+
+<p> Dimensions of train and test data.</p>
+<div class="chunk" id="unnamed-chunk-4"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">dim</span><span class="hl std">(train)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## [1] 13737   160
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl kwd">dim</span><span class="hl std">(test)</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## [1] 5885  160
+</pre></div>
+</div></div>
+<p> Both train and test data set have  160 variables</p>
+
+<p>Data cleaning of training data set for further use 
+"nearly-zero-variance" for training data predictors and there ID variables for
+identifing and eliminating prior to modeling.</p>
+<div class="chunk" id="unnamed-chunk-5"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">natr</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">nearZeroVar</span><span class="hl std">(train)</span>
+
+<span class="hl std">train1</span> <span class="hl kwb">&lt;-</span> <span class="hl std">train[,</span><span class="hl opt">-</span><span class="hl std">natr]</span>
+<span class="hl std">test1</span> <span class="hl kwb">&lt;-</span>  <span class="hl std">test[,</span><span class="hl opt">-</span><span class="hl std">natr]</span>
+</pre></div>
+</div></div>
+<p> Removing variables that are mostly NA</p>
+<div class="chunk" id="unnamed-chunk-6"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">nas</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">sapply</span><span class="hl std">(train1,</span><span class="hl kwa">function</span><span class="hl std">(</span><span class="hl kwc">x</span><span class="hl std">)</span><span class="hl kwd">mean</span><span class="hl std">(</span><span class="hl kwd">is.na</span><span class="hl std">(x)))</span><span class="hl opt">&gt;</span><span class="hl num">0.95</span>
+
+<span class="hl std">train2</span> <span class="hl kwb">&lt;-</span> <span class="hl std">train1[,nas</span><span class="hl opt">==</span> <span class="hl num">FALSE</span><span class="hl std">]</span>
+<span class="hl std">test2</span> <span class="hl kwb">&lt;-</span>  <span class="hl std">test1[,nas</span><span class="hl opt">==</span> <span class="hl num">FALSE</span><span class="hl std">]</span>
+</pre></div>
+</div></div>
+<p> training and testing data set for modeling</p>
+<div class="chunk" id="unnamed-chunk-7"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">training</span> <span class="hl kwb">&lt;-</span> <span class="hl std">train2[,</span><span class="hl num">8</span><span class="hl opt">:</span><span class="hl num">59</span><span class="hl std">]</span>
+<span class="hl std">testing</span> <span class="hl kwb">&lt;-</span> <span class="hl std">test2[,</span><span class="hl num">8</span><span class="hl opt">:</span><span class="hl num">59</span><span class="hl std">]</span>
+</pre></div>
+</div></div>
+<p>With the process of cleaning data reduced to 54 variables</p>
+
+<p>Correlation Analysis with correlation plot( corrplot)</p>
+<div class="chunk" id="unnamed-chunk-8"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">correlation</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">cor</span><span class="hl std">(training[,</span><span class="hl num">1</span><span class="hl opt">:</span><span class="hl num">51</span><span class="hl std">])</span>
+<span class="hl kwd">corrplot</span><span class="hl std">(correlation,</span> <span class="hl kwc">type</span> <span class="hl std">=</span><span class="hl str">&quot;lower&quot;</span><span class="hl std">,</span> <span class="hl kwc">method</span> <span class="hl std">=</span> <span class="hl str">&quot;color&quot;</span><span class="hl std">)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-8-1.png" title="plot of chunk unnamed-chunk-8" alt="plot of chunk unnamed-chunk-8" class="plot" /></div></div>
+<p>Highly correlated variables are shown with dark color in the graph.</p>
+
+<p> Three methods are used for model the regression (the training data set) and 
+the best one with higher accuracy will be used for quiz pediction. The methods are 
+1 Decision Tree Model
+2 Random Forest
+3 Generalized Boosted Model
+ Confusion Matrix is plotted at the end of every analysis for better accuracy of the models</p>
+
+<p>a) Method : Decision Tree Model</p>
+<div class="chunk" id="unnamed-chunk-9"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">mod1</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">train</span><span class="hl std">(classe</span> <span class="hl opt">~</span><span class="hl std">.,training,</span> <span class="hl kwc">method</span> <span class="hl std">=</span><span class="hl str">&quot;rpart&quot;</span><span class="hl std">)</span>
+</pre></div>
+</div></div>
+<p> Prediction on testing data set</p>
+<div class="chunk" id="unnamed-chunk-10"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">pred1</span>  <span class="hl kwb">&lt;-</span> <span class="hl kwd">predict</span><span class="hl std">(mod1, testing)</span>
+<span class="hl std">cnmat1</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">confusionMatrix</span><span class="hl std">(pred1, testing</span><span class="hl opt">$</span><span class="hl std">classe)</span>
+<span class="hl std">cnmat1</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction    A    B    C    D    E
+##          A 1522  472  463  436  267
+##          B   22  399   34  174  208
+##          C   83  116  455  121  142
+##          D   32  151   74  233  172
+##          E   15    1    0    0  293
+## 
+## Overall Statistics
+##                                          
+##                Accuracy : 0.4931         
+##                  95% CI : (0.4803, 0.506)
+##     No Information Rate : 0.2845         
+##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16      
+##                                          
+##                   Kappa : 0.337          
+##  Mcnemar's Test P-Value : &lt; 2.2e-16      
+## 
+## Statistics by Class:
+## 
+##                      Class: A Class: B Class: C Class: D Class: E
+## Sensitivity            0.9092   0.3503  0.44347  0.24170  0.27079
+## Specificity            0.6110   0.9077  0.90492  0.91282  0.99667
+## Pos Pred Value         0.4816   0.4767  0.49618  0.35196  0.94822
+## Neg Pred Value         0.9442   0.8534  0.88506  0.86004  0.85850
+## Prevalence             0.2845   0.1935  0.17434  0.16381  0.18386
+## Detection Rate         0.2586   0.0678  0.07732  0.03959  0.04979
+## Detection Prevalence   0.5370   0.1422  0.15582  0.11249  0.05251
+## Balanced Accuracy      0.7601   0.6290  0.67419  0.57726  0.63373
+</pre></div>
+</div></div>
+<p> Plot</p>
+<div class="chunk" id="unnamed-chunk-11"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">fancyRpartPlot</span><span class="hl std">(mod1</span><span class="hl opt">$</span><span class="hl std">finalModel)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-11-1.png" title="plot of chunk unnamed-chunk-11" alt="plot of chunk unnamed-chunk-11" class="plot" /></div></div>
+<p>b) Method : Random Forest Model</p>
+<div class="chunk" id="unnamed-chunk-12"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">mod2</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">randomForest</span><span class="hl std">(classe</span> <span class="hl opt">~</span><span class="hl std">.,</span> <span class="hl kwc">data</span><span class="hl std">=training,</span> <span class="hl kwc">ntree</span><span class="hl std">=</span> <span class="hl num">1000</span><span class="hl std">)</span>
+</pre></div>
+</div></div>
+<p> Prediction on testing data set</p>
+<div class="chunk" id="unnamed-chunk-13"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">pred2</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">predict</span><span class="hl std">(mod2, testing)</span>
+<span class="hl std">cnmat2</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">confusionMatrix</span><span class="hl std">(pred2, testing</span><span class="hl opt">$</span><span class="hl std">classe)</span>
+<span class="hl std">cnmat2</span>
+</pre></div>
+<div class="output"><pre class="knitr r">## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction    A    B    C    D    E
+##          A 1674    3    0    0    0
+##          B    0 1133   13    0    0
+##          C    0    3 1013   12    0
+##          D    0    0    0  952    7
+##          E    0    0    0    0 1075
+## 
+## Overall Statistics
+##                                           
+##                Accuracy : 0.9935          
+##                  95% CI : (0.9911, 0.9954)
+##     No Information Rate : 0.2845          
+##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
+##                                           
+##                   Kappa : 0.9918          
+##  Mcnemar's Test P-Value : NA              
+## 
+## Statistics by Class:
+## 
+##                      Class: A Class: B Class: C Class: D Class: E
+## Sensitivity            1.0000   0.9947   0.9873   0.9876   0.9935
+## Specificity            0.9993   0.9973   0.9969   0.9986   1.0000
+## Pos Pred Value         0.9982   0.9887   0.9854   0.9927   1.0000
+## Neg Pred Value         1.0000   0.9987   0.9973   0.9976   0.9985
+## Prevalence             0.2845   0.1935   0.1743   0.1638   0.1839
+## Detection Rate         0.2845   0.1925   0.1721   0.1618   0.1827
+## Detection Prevalence   0.2850   0.1947   0.1747   0.1630   0.1827
+## Balanced Accuracy      0.9996   0.9960   0.9921   0.9931   0.9968
+</pre></div>
+</div></div>
+<p> Plot</p>
+<div class="chunk" id="unnamed-chunk-14"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">plot</span><span class="hl std">(cnmat2</span><span class="hl opt">$</span><span class="hl std">table,</span> <span class="hl kwc">col</span><span class="hl std">=cnmat2</span><span class="hl opt">$</span><span class="hl std">byclass,</span> <span class="hl kwc">main</span> <span class="hl std">=</span> <span class="hl kwd">paste</span><span class="hl std">(</span> <span class="hl str">&quot;decision Tree - Accuracy =&quot;</span><span class="hl std">,</span>
+                                                     <span class="hl kwd">round</span><span class="hl std">(cnmat2</span><span class="hl opt">$</span><span class="hl std">overall[</span><span class="hl str">&quot;Accuracy&quot;</span><span class="hl std">],</span><span class="hl num">4</span><span class="hl std">)))</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-14-1.png" title="plot of chunk unnamed-chunk-14" alt="plot of chunk unnamed-chunk-14" class="plot" /></div></div>
+#c)  Generalized Boosted Model
+<div class="chunk" id="unnamed-chunk-15"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">controlpr</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">trainControl</span><span class="hl std">(</span><span class="hl kwc">method</span> <span class="hl std">=</span><span class="hl str">&quot;cv&quot;</span><span class="hl std">,</span> <span class="hl kwc">number</span> <span class="hl std">=</span><span class="hl num">3</span><span class="hl std">,</span> <span class="hl kwc">verbose</span> <span class="hl std">=</span> <span class="hl num">FALSE</span>  <span class="hl std">)</span>
+<span class="hl std">mod3</span>  <span class="hl kwb">&lt;-</span> <span class="hl kwd">train</span><span class="hl std">(classe</span><span class="hl opt">~</span><span class="hl std">.,</span> <span class="hl kwc">data</span> <span class="hl std">= training,</span> <span class="hl kwc">method</span><span class="hl std">=</span><span class="hl str">'gbm'</span><span class="hl std">,</span> <span class="hl kwc">trControl</span> <span class="hl std">= controlpr,</span> <span class="hl kwc">verbose</span><span class="hl std">=</span> <span class="hl num">FALSE</span><span class="hl std">)</span>
+</pre></div>
+</div></div>
+<p>A gradient boosted model with multinomial loss function.
+150 iterations were performed.
+There were 51 predictors of which 51 had non-zero influence.</p>
+
+ <p>Prediction on testing data set</p>
+<div class="chunk" id="unnamed-chunk-16"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">pred3</span>  <span class="hl kwb">&lt;-</span> <span class="hl kwd">predict</span><span class="hl std">(mod3, testing)</span>
+<span class="hl std">cnmat3</span>  <span class="hl kwb">&lt;-</span> <span class="hl kwd">confusionMatrix</span><span class="hl std">( pred3, testing</span><span class="hl opt">$</span><span class="hl std">classe)</span><span class="hl opt">$</span><span class="hl std">overall[</span><span class="hl num">1</span><span class="hl std">]</span>
+<span class="hl std">cnmat3</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##  Accuracy 
+## 0.9587086
+</pre></div>
+</div></div>
+<p> With 3 different regression models we got 3 different accuracies :  
+a) Decision Tree Model
+Accuracy : 0.4856 
+
+b) Random Forest Model
+Accuracy : 0.9961  
+
+c) Genralized Boosted Model
+Accuracy : 0.9658454 
+ After getting Accuracies of 3 different regression model we finalaze to go with 
+Random Forest machine learning algorithm.
+
+Applied Random Forest machine learning algorithm to the 20 test cases available in the test data 
+ predict in appropriate format to the Course Project Prediction Quiz for automated grading.</p>
+
+<div class="chunk" id="unnamed-chunk-17"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">pred5</span> <span class="hl kwb">&lt;-</span> <span class="hl kwd">predict</span><span class="hl std">(mod2, datts)</span>
+</pre></div>
+</div></div>
+
+<p> got result as follows:</p>
+
+<div class="chunk" id="unnamed-chunk-18"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">pred5</span>
+</pre></div>
+<div class="output"><pre class="knitr r">##  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 
+##  B  A  B  A  A  E  D  B  A  A  B  C  B  A  E  E  A  B  B  B 
+## Levels: A B C D E
+</pre></div>
+</div></div>
+
+
+<p> Plot</p>
+<div class="chunk" id="unnamed-chunk-19"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">plot</span><span class="hl std">(pred5,</span> <span class="hl kwc">col</span><span class="hl std">=</span> <span class="hl str">&quot;red&quot;</span><span class="hl std">,</span> <span class="hl kwc">main</span> <span class="hl std">=</span> <span class="hl str">&quot;Test Cases (Random Forest)&quot;</span> <span class="hl std">)</span>
+</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-19-1.png" title="plot of chunk unnamed-chunk-19" alt="plot of chunk unnamed-chunk-19" class="plot" /></div></div>
+
+
+
+
+
+
+
+
+
+</body>
+</html>
