@@ -31,10 +31,12 @@ end.rcode-->
 
 <p>The training and testing data for this project are available here:</p>
 <!--begin.rcode
-dattr <- read.csv("C:/Users/akshi/Documents/R/coursera_data_science/8_Practical_machine_learning/week4/assingment_machine_learning/pml-training.csv")
-datts <- read.csv("C:/Users/akshi/Documents/R/coursera_data_science/8_Practical_machine_learning/week4/assingment_machine_learning/pml-testing.csv")
+dataurl <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
 
-end.rcode-->
+quizurl <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+
+dattr <- read.csv(dataurl)
+datts <- read.csv(quizurl)
 <p> Partition of dattr data into (70%)training data set for modeling process and
 (30%)testing data set for validations.</p>
 <!--begin.rcode
