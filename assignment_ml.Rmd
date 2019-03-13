@@ -21,8 +21,12 @@ library(corrplot)
 #The training and testing data for this project are available here:
 
 ```{r}
-dattr<-read.csv("C:/Users/akshi/Documents/R/coursera_data_science/8_Practical_machine_learning/week4/assingment_machine_learning/pml-training.csv")
-datts<-read.csv("C:/Users/akshi/Documents/R/coursera_data_science/8_Practical_machine_learning/week4/assingment_machine_learning/pml-testing.csv")
+dataurl <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+
+quizurl <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+
+dattr <- read.csv(dataurl)
+datts <- read.csv(quizurl)
 
 ```
 #Partition of dattr data into:
